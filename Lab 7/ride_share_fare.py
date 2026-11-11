@@ -1,15 +1,55 @@
+import math
+
 def parse_trip(text):
-    cab, km = text.split(':')
-    return cab.strip().title(), float(km)
+    if not isinstance(text, str):
+        return None
+    parts = text.split(':')
+    if len(parts) != 2:
+        return None
+    cab, km = parts
+    cab = cab.strip()
+    if not cab:
+        return None
+    try:
+        km_val = float(km.strip())
+        if not math.isfinite(km_val) or km_val < 0:
+            return None
+        return cab.title(), km_val
+    except (ValueError, TypeError):
+        return None
 
 def fare_average(fares_csv):
-    values = [int(r) for r in fares_csv.split(',')]
-    return sum(values) // len(values)
+    if not isinstance(fares_csv, str):
+        return 0
+    parts = [r.strip() for r in fares_csv.split(',') if r.strip()]
+    if not parts:
+        return 0
+    try:
+        values = [int(r) for r in parts]
+        if not values:
+            return 0
+        return sum(values) // len(values)
+    except (ValueError, TypeError):
+        return 0
 
 def payable_fare(text):
-    fare, promo = text.split('|')
-    total = float(fare) * 1.18 - float(promo)
-    return max(total, 0)
+    if not isinstance(text, str):
+        return 0.0
+    parts = text.split('|')
+    if len(parts) != 2:
+        return 0.0
+    fare_str, promo_str = parts
+    try:
+        fare = float(fare_str.strip())
+        promo = float(promo_str.strip())
+        if not (math.isfinite(fare) and math.isfinite(promo)):
+            return 0.0
+        if fare < 0 or promo < 0:
+            return 0.0
+        total = fare * 1.18 - promo
+        return max(total, 0.0)
+    except (ValueError, TypeError):
+        return 0.0
 
 def main():
     print("==== Running parse_trip ====")
